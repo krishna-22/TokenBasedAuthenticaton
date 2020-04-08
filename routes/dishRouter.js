@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyparser = require('body-parser')
+var authenticate = require('../authenticate');
 const dishRouter = express.Router()
 const mongoose = require('mongoose')
 const Dishes = require('../models/dishes')
@@ -18,7 +19,7 @@ dishRouter.route('/')
         },(err)=>next(err))
         .catch((err)=>next(err));    
 })
-.post((req,res)=>
+.post(authenticate.verifyUser,(req,res)=>
 {
     Dishes.create(req.body)
     .then((dish)=>{
@@ -30,13 +31,13 @@ dishRouter.route('/')
     .catch((err)=>next(err));  
     })
 
-.put((req,res)=>
+.put(authenticate.verifyUser,(req,res)=>
 {
     res.statusCode=403
     res.end('put operation is not supported on dishes')
 }) 
 
-.delete((req,res)=>
+.delete(authenticate.verifyUser,(req,res)=>
 {
     Dishes.remove({})
     .then((resp)=>{
@@ -59,11 +60,11 @@ dishRouter.route('/:dishId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser,(req, res, next) => {
     res.statusCode = 403;
     res.end('POST operation not supported on /dishes/'+ req.params.dishId);
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser,(req, res, next) => {
     Dishes.findByIdAndUpdate(req.params.dishId, {
         $set: req.body
     }, { new: true }) //new true will return updated dish
@@ -74,7 +75,7 @@ dishRouter.route('/:dishId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser,(req, res, next) => {
     Dishes.findByIdAndRemove(req.params.dishId)
     .then((resp) => {
         res.statusCode = 200;
